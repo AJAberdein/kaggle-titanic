@@ -182,11 +182,53 @@ X_train.isnull().sum()
 
 tree.fit(X_train, y_train)
 
-tree.predict(test_data)
 
-# In[242]:
+# In[259]:
 
-tree.predict(test_data)
+drop_elements = ['PassengerId', 'SibSp']
+test_data = test_data.drop(drop_elements, axis = 1)
+
+
+# In[260]:
+
+drop_elements = ['Age']
+test_data = test_data.drop(drop_elements, axis = 1)
+
+
+# In[261]:
+
+X_test = test_data
+
+
+# In[263]:
+
+X_test.info()
+
+
+# In[267]:
+
+X_test.isnull().sum()
+
+
+# In[268]:
+
+X_test.head()
+
+
+# In[275]:
+
+drop_elements = ['Fare']
+X_test = X_test.drop(drop_elements, axis = 1)
+
+
+# In[276]:
+
+X_test.isnull().sum()
+
+
+# In[277]:
+
+y_pred = tree.predict(X_test)
 
 
 # In[ ]:
