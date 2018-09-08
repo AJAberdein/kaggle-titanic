@@ -1,287 +1,639 @@
 
 # coding: utf-8
 
-# In[199]:
+# In[391]:
 
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
+import numpy as np
+import matplotlib.pyplot as plt
+
+get_ipython().magic('matplotlib inline')
 
 
-# In[200]:
+# In[392]:
 
 train = pd.read_csv('data/train.csv')
-test = pd.read_csv('data/train.csv')
 
 
-# In[201]:
+# In[393]:
 
-train.head()
-
-
-# In[202]:
-
-train['Has_Cabin'] = train["Cabin"].apply(lambda x: 0 if type(x) == float else 1)
-test['Has_Cabin'] = test["Cabin"].apply(lambda x: 0 if type(x) == float else 1)
+test = pd.read_csv('data/test.csv')
 
 
-# In[203]:
-
-train['Embarked'].isnull().sum()
-
-
-# In[204]:
-
-train['Cabin'].isnull().sum()
-
-
-# In[205]:
-
-train.info()
-
-
-# In[206]:
-
-train['Embarked'] = train['Embarked'].fillna('S')
-test['Embarked'] = test['Embarked'].fillna('S')
-
-
-# In[207]:
-
-train['Age'].mean()
-
-
-# In[208]:
-
-test['Age'].mean()
-
-
-# In[209]:
-
-train['Age'] = train['Age'].fillna(train['Age'].mean())
-test['Age'] = test['Age'].fillna(test['Age'].mean())
-
-
-# In[210]:
-
-train = train.drop(['Name', 'PassengerId', 'Ticket', 'Cabin'], axis=1)
-test = test.drop(['Name', 'PassengerId', 'Ticket', 'Cabin'], axis=1)
-
-
-# In[211]:
+# In[394]:
 
 train.head()
 
 
-# In[212]:
+# In[395]:
+
+test.head()
+
+
+# In[396]:
+
+train.drop(['PassengerId'], axis=1, inplace=True)
+test.drop(['PassengerId'], axis=1, inplace=True)
+
+
+# In[397]:
+
+train.describe()
+
+
+# In[398]:
+
+test.describe()
+
+
+# In[399]:
+
+fig = plt.figure(figsize=(10,4))
+fig.add_subplot(121)
+train.Survived[train['Sex'] == 'male'].value_counts().plot(kind='pie')
+fig.add_subplot(122)
+train.Survived[train['Sex'] == 'female'].value_counts().plot(kind='pie')
+
+
+# In[400]:
+
+from sklearn.preprocessing import LabelEncoder
+train['Sex'] = LabelEncoder().fit_transform(train['Sex']) #cool!
+
+
+# In[401]:
+
+train.head()
+
+
+# In[402]:
+
+test.head()
+
+
+# In[403]:
+
+test['Sex'] = LabelEncoder().fit_transform(test['Sex'])
+
+
+# In[404]:
+
+test.head()
+
+
+# In[405]:
+
+# titles:
+
+
+# In[406]:
+
+train['Name'].head()
+
+
+# In[407]:
+
+train['Title'] = train['Name'].map(lambda x: x.split(',')[1].split('.')[0].strip())
+
+
+# In[408]:
+
+train.head()
+
+
+# In[409]:
+
+test['Title'] = test['Name'].map(lambda x: x.split(',')[1].split('.')[0].strip())
+
+
+# In[410]:
+
+test.head()
+
+
+# In[411]:
+
+train_titles = train['Title'].unique()
+test_titles = test['Title'].unique()
+
+
+# In[412]:
+
+train_titles
+
+
+# In[413]:
+
+test_titles
+
+
+# In[414]:
+
+train_means_age = dict()
+test_means_age = dict()
+
+
+# In[415]:
+
+titles = list()
+
+
+# In[416]:
+
+train_titles
+
+
+# In[417]:
+
+for title in train_titles:
+    titles.append(title)
+    
+for title in test_titles:
+        titles.append(title)
+
+
+
+# In[418]:
+
+# titles = train_titles + test_titles
+
+
+# In[419]:
+
+titles = list(set(titles))
+
+
+# In[420]:
+
+titles
+
+
+# In[421]:
+
+mean_titles = dict()
+
+
+# In[ ]:
+
+
+
+
+# In[422]:
+
+# train.Age[(train["Age"] != -1) & (train['Title'] == 'Mr')]
+# train.Age[(train["Age"] == -1)]
+# train[(train["Age"] == -1) & (train['Title'] == 'Mr')]
+
+
+# In[423]:
+
+train.Age[(train["Age"] != -1) & (train['Title'] == 'Mr')].mean()
+
+
+# In[424]:
+
+train['Age'].fillna(-1, inplace=True)
+test['Age'].fillna(-1, inplace=True)
+
+
+# In[425]:
+
+# train['Age']
+
+
+# In[426]:
+
+#Conjoined list of titles
+
+for title in titles:
+    mean_train = train.Age[(train["Age"] != -1) & (train['Title'] == title)].mean()
+    train_means_age[title] = mean_train
+    
+    
+#     print(title)
+#     print(mean_train)
+#     print(train_means_age[title])
+    
+# print(train_means_age)
+
+
+for title in titles:
+    mean_test = test.Age[(test["Age"] != -1) & (test['Title'] == title)].mean()
+    test_means_age[title] = mean_test
+    
+
+    
+    
+
+    
+#     mean_test = test.Age[(test["Age"] != -1) & (test['Title'] == title)].mean()
+#     test_means_age[title] = mean
+    
+    
+    #get mean of train
+    #get mean of test data
+    
+    #if mean_train && mean_test
+    #mean of the two means
+    
+    #else if train use train
+    #else test
+    
+    
+    
+
+
+# In[427]:
+
+mean_titles = dict()
+
+for title in titles:
+    if (not np.isnan(train_means_age[title])) & (not np.isnan(test_means_age[title])):
+        mean_titles[title] = (train_means_age[title] + test_means_age[title]) / 2
+    elif (not np.isnan(train_means_age[title])):
+        mean_titles[title] = train_means_age[title]
+    elif (not np.isnan(test_means_age[title])):
+        mean_titles[title] = test_means_age[title]
+        
+        
+mean_titles
+
+#     if (test_means_age[title]):
+#         print(title)
+        
+    
+#     print(train_means_age[title])
+
+
+# In[428]:
+
+if 'Mr' in train['Title']:
+    print('hi') 
+else:
+    print('no')
+
+
+# In[429]:
+
+train_means_age
+
+
+# In[430]:
+
+test_means_age
+
+
+# In[431]:
+
+train.head()
+
+
+# In[432]:
+
+mean_titles[row['Name']]
+
+
+# In[433]:
+
+# for key, value in train.iterrows():
+#     if row['Age'] == -1:
+#         train.loc[key, 'Age'] = mean_titles[]
+#         train['Age'] =  mean_titles[value['']]
+#     print(value)
+
+
+for key, value in train.iterrows():
+#     print(value['Age'])
+#     print(value['Age'] == -1)
+    if value['Age'] == -1:
+        print(value['Age'])
+#         value['Age'] = 
+#         print(mean_titles[value['Title']])
+#         value['Age'] = mean_titles[value['Title']]
+        train.loc[key, 'Age'] = mean_titles[value['Title']]
+
+        print(value['Age'])
+    
+    
+
+
+# In[434]:
+
+for key, value in train.iterrows():
+    print(value['Age'] == -1)
+    if value['Age'] == -1:
+        print(value['Title'])
+
+
+# In[435]:
 
 train.isnull().sum()
 
 
-# In[213]:
+# In[436]:
 
-train['Sex'] = train['Sex'].map( {'female': 0, 'male': 1} )
-test['Sex'] = test['Sex'].map( {'female': 0, 'male': 1} )
-
-
-# In[214]:
-
-train.head()
+for key, value in test.iterrows():
+    if value['Age'] == -1:
+        test.loc[key, 'Age'] = mean_titles[value['Title']]
 
 
-# In[215]:
-
-train['Embarked'] = train['Embarked'].map( {'S': 0, 'C': 1, 'Q': 1} )
-test['Embarked'] = test['Embarked'].map( {'S': 0, 'C': 1, 'Q': 1} )
-
-
-# In[216]:
-
-tree = DecisionTreeClassifier()
-
-
-# In[217]:
-
-y_train = train['Survived']
-
-
-# In[218]:
-
-x_train = train.copy()
-
-
-# In[ ]:
-
-
-
-
-# In[219]:
-
-x_train = x_train.drop(['Survived'], axis=1)
-
-
-# In[220]:
-
-x_train.values
-
-
-# In[221]:
-
-x_train = x_train.values
-
-
-# In[222]:
-
-x_train
-
-
-# In[223]:
-
-train.info()
-
-
-# In[224]:
-
-train.head()
-
-
-# In[198]:
-
-
-
-
-# In[225]:
-
-train.head()
-
-
-# In[226]:
-
-tree.fit(x_train, y_train)
-
-
-# In[ ]:
-
-
-
-
-# In[227]:
-
-train.head()
-
-
-# In[228]:
+# In[437]:
 
 test.head()
 
 
-# In[232]:
-
-x_test = test.values
-
-
-# In[233]:
-
-x_test
-
-
-# In[234]:
-
-predictions = tree.predict(x_test)
-
-
-# In[236]:
-
-test.head()
-
-
-# In[237]:
+# In[438]:
 
 train.head()
 
 
-# In[238]:
+# In[439]:
 
-x_test = test.copy()
-
-
-# In[241]:
-
-x_test.drop('Survived', axis=1)
+train.drop(['Cabin'], axis=1, inplace=True)
+test.drop(['Cabin'], axis=1, inplace=True)
 
 
-# In[243]:
+# In[440]:
 
-x_test.head()
+fig = plt.figure(figsize=(15,6))
 
-
-# In[252]:
-
-x_test = x_test.drop('Survived', axis=1)
-
-
-# In[253]:
-
-x_test
+i = 1
+for title in train['Title'].unique():
+    fig.add_subplot(3,6,i)
+    plt.title(title)
+    train.Survived[train['Title'] == title].value_counts().plot(kind='pie')
+    i += 1
+        
 
 
-# In[254]:
+# In[441]:
 
-predictions = tree.predict(x_test.values)
+# fig = plt.figure(figsize=(15,6))
+
+# i = 1
+# for title in test['Title'].unique():
+#     fig.add_subplot(3,6,i)
+#     plt.title(title)
+#     test.Survived[test['Title'] == title].value_counts().plot(kind='pie')
+#     i += 1
+        
+    
+# no survival on test
 
 
-# In[265]:
+# In[442]:
 
-score = round(tree.score(x_train, y_train) * 100, 2)
-score
-
-
-# In[266]:
-
-predictions
+mean_titles
 
 
-# In[267]:
+# In[443]:
+
+replace = {
+    'Don': 0,
+    'Dona': 0,
+    'Rev': 0,
+    'Jonkheer': 0,
+    'Capt': 0,
+    'Mr': 1,
+    'Dr': 2,
+    'Col': 3,
+    'Major': 3,
+    'Master': 4,
+    'Miss': 5,
+    'Mrs': 6,
+    'Mme': 7,
+    'Ms': 7,
+    'Mlle': 7,
+    'Sir': 7,
+    'Lady': 7,
+    'the Countess': 7
+}
+
+train['Title'] = train['Title'].apply(lambda x: replace.get(x))
+test['Title'] = test['Title'].apply(lambda x: replace.get(x))
+
+
+
+# In[444]:
+
+train.head()
+
+
+# In[445]:
+
+test.head()
+
+
+# In[446]:
+
+from sklearn.preprocessing import StandardScaler
+train['Title'] = StandardScaler().fit_transform(train['Title'].values.reshape(-1, 1))
+test['Title'] = StandardScaler().fit_transform(test['Title'].values.reshape(-1, 1))
+
+
+# In[447]:
+
+train.head()
+
+
+# In[448]:
+
+test.head()
+
+
+# In[449]:
+
+train.drop(['Name'], axis=1, inplace=True)
+test.drop(['Name'], axis=1, inplace=True)
+
+
+# In[450]:
+
+train.head()
+
+
+# In[451]:
+
+train['Age'] = StandardScaler().fit_transform(train['Age'].values.reshape(-1, 1))
+test['Age'] = StandardScaler().fit_transform(test['Age'].values.reshape(-1, 1))
+
+
+# In[452]:
+
+test.isnull().sum()
+
+
+# In[453]:
+
+train.drop(['Ticket'], axis=1, inplace=True)
+test.drop(['Ticket'], axis=1, inplace=True)
+
+
+# In[454]:
+
+train.head()
+
+
+# In[455]:
+
+train['Embarked'].value_counts()
+
+
+# In[456]:
+
+# import seaborn as sns
+
+# colormap = plt.cm.viridis
+# plt.figure(figsize=(12,12))
+# plt.title('Pearson Correlation of Features', y=1.05, size=15)
+# sns.heatmap(train.astype(float).corr(),linewidths=0.1,vmax=1.0, square=True, cmap=colormap, linecolor='white', annot=True)
+
+
+# In[457]:
+
+train['Embarked'].fillna('S', inplace=True)
+test['Embarked'].fillna('S', inplace=True)
+
+
+# In[458]:
+
+replace = {
+    'S': 0,
+    'Q': 1,
+    'C': 2
+}
+train['Embarked'] = train['Embarked'].apply(lambda x: replace.get(x))
+test['Embarked'] = test['Embarked'].apply(lambda x: replace.get(x))
+
+
+# In[459]:
+
+train['Embarked'] = StandardScaler().fit_transform(train['Embarked'].values.reshape(-1, 1))
+test['Embarked'] = StandardScaler().fit_transform(test['Embarked'].values.reshape(-1, 1))
+
+
+# In[460]:
+
+train.head()
+
+
+# In[461]:
+
+test.head()
+
+
+# In[462]:
+
+test.isnull().sum()
+
+
+# In[463]:
+
+(test['Fare'].mean() + train['Fare'].mean()) / 2
+
+
+# In[464]:
+
+test['Fare'].fillna((test['Fare'].mean() + train['Fare'].mean()) / 2, inplace=True)
+
+
+# In[465]:
+
+test.isnull().sum()
+
+
+# In[466]:
+
+test.head()
+
+
+# In[467]:
+
+train_copy = train.copy()
+test_copy = test.copy()
+
+# train = train_copy.copy()
+
+
+# In[468]:
+
+train_copy.head()
+
+
+# In[469]:
+
+
+from sklearn.model_selection import train_test_split
+survived = train['Survived']
+train.drop('Survived', axis=1, inplace=True)
+X_train, X_test, y_train, y_test = train_test_split(train, survived, test_size=0.2, random_state=42)
+
+
+# In[470]:
+
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+
+models = [
+    MLPClassifier(),
+    KNeighborsClassifier(),
+    SVC(),
+    RandomForestClassifier(n_estimators=100),
+    GaussianProcessClassifier(),
+    DecisionTreeClassifier(),
+    GaussianNB(),
+    QuadraticDiscriminantAnalysis()
+]
+
+for model in models:
+    model.fit(X_train, y_train)
+    score = model.score(X_test, y_test)
+    print(score)
+
+
+# In[471]:
+
+for model in models:
+    model.fit(train, survived)
+    score = model.score(X_test, y_test)
+    print(score)
+
+
+# In[472]:
+
+# go for the RandomForestClassifier
+
+
+# In[474]:
+
+forest = RandomForestClassifier(n_estimators=100)
+forest.fit(train, survived)
+y_pred = forest.predict(test.values)
+
+
+# In[479]:
+
+test_original = pd.read_csv('data/test.csv')
+PassengerId = test_original['PassengerId']
+
+
+# In[481]:
 
 submission = pd.DataFrame({
         "PassengerId": PassengerId,
-        "Survived": predictions
+        "Survived": y_pred
     })
 
 
-# In[268]:
+# In[482]:
 
-test = pd.read_csv('data/train.csv')
-
-
-# In[269]:
-
-PassengerId = test['PassengerId']
-
-
-# In[270]:
-
-submission = pd.DataFrame({
-        "PassengerId": PassengerId,
-        "Survived": predictions
-    })
-
-
-# In[272]:
-
-submission.info()
-
-
-# In[274]:
-
-# WAY TOO HIGH A SCORE, SCORE IS 98.650000000000006%
-
-#POSSIBLE ISSUES:
-
-# I DIDN'T RUN THE TEST PROPERLY ?
-
-# OR
-
-# I OVERFITTED THE DECISION TREES ?
+submission.to_csv('submission.csv', index=False)
 
 
 # In[ ]:
